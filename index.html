@@ -1,0 +1,636 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio IA</title>
+
+    <style>
+        :root {
+            --roxo-escuro: #160d2b;
+            --roxo-fundo: #241442;
+            --roxo-medio: #56358a;
+            --roxo: #8657c9;
+            --lilas: #c5a5f5;
+            --lilas-claro: #e3d3ff;
+            --texto: #ffffff;
+            --verde: #a8e6c1;
+            --rosa: #ffafc2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(
+                135deg,
+                var(--roxo-escuro),
+                var(--roxo-fundo),
+                #38215c
+            );
+            color: var(--texto);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(197, 165, 245, 0.2);
+            backdrop-filter: blur(15px);
+            width: 100%;
+            max-width: 650px;
+            padding: 35px;
+            border-radius: 22px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .topo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .icone {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: var(--lilas-claro);
+        }
+
+        .subtitulo {
+            color: #d5c6eb;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .progresso-texto {
+            display: flex;
+            justify-content: space-between;
+            color: #d5c6eb;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .barra {
+            width: 100%;
+            height: 7px;
+            background: rgba(255, 255, 255, 0.13);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 27px;
+        }
+
+        .barra-preenchida {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(
+                90deg,
+                #9366d6,
+                #d0aaff
+            );
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .pergunta {
+            font-size: 21px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            color: #f2eaff;
+        }
+
+        .opcoes {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        .opcao {
+            background: rgba(255, 255, 255, 0.06);
+            color: white;
+            border: 1px solid rgba(197, 165, 245, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .opcao:hover:not(:disabled) {
+            background: rgba(134, 87, 201, 0.22);
+            border-color: var(--lilas);
+            transform: translateY(-2px);
+        }
+
+        .opcao:disabled {
+            cursor: default;
+        }
+
+        .opcao.correta {
+            background: rgba(88, 170, 119, 0.13);
+            border-color: #83cda1;
+        }
+
+        .opcao.errada {
+            background: rgba(210, 90, 125, 0.12);
+            border-color: #e99ab0;
+        }
+
+        /* Área de justificativa */
+
+        .explicacao {
+            display: none;
+            margin-top: 18px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(197, 165, 245, 0.15);
+            line-height: 1.5;
+            animation: aparecer 0.3s ease;
+        }
+
+        .explicacao h3 {
+            font-size: 14px;
+            margin-bottom: 7px;
+            color: var(--lilas-claro);
+        }
+
+        .explicacao p {
+            color: #e0d5f1;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .explicacao .outro-caminho {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(197, 165, 245, 0.15);
+            color: #cbb8e8;
+            font-size: 12px;
+        }
+
+        .botao {
+            display: none;
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: linear-gradient(
+                90deg,
+                #7046ad,
+                #9869d4
+            );
+            border: none;
+            border-radius: 11px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .botao:hover {
+            filter: brightness(1.15);
+            transform: translateY(-2px);
+        }
+
+        .resultado {
+            display: none;
+            text-align: center;
+        }
+
+        .resultado h2 {
+            font-size: 26px;
+            margin-bottom: 12px;
+            color: var(--lilas-claro);
+        }
+
+        .pontuacao {
+            font-size: 40px;
+            font-weight: bold;
+            color: var(--lilas);
+            margin: 18px 0;
+        }
+
+        .resultado p {
+            line-height: 1.6;
+            color: #e0d5f1;
+            font-size: 14px;
+        }
+
+        .rodape {
+            text-align: center;
+            color: #b9a5d7;
+            font-size: 11px;
+            margin-top: 24px;
+            letter-spacing: 1px;
+        }
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 23px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .pergunta {
+                font-size: 19px;
+            }
+
+            .opcao {
+                padding: 13px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <header class="topo">
+            <div class="icone">🤖</div>
+
+            <h1>Desafio IA</h1>
+
+            <p class="subtitulo">
+                Dois caminhos, diferentes perspectivas.
+                Será que você consegue desvendar a inteligência artificial?
+            </p>
+        </header>
+
+        <section id="jogo">
+
+            <div class="progresso-texto">
+                <span id="numero">Pergunta 1 de 5</span>
+                <span id="acertos">Acertos: 0</span>
+            </div>
+
+            <div class="barra">
+                <div class="barra-preenchida" id="barra"></div>
+            </div>
+
+            <h2 class="pergunta" id="pergunta"></h2>
+
+            <div class="opcoes" id="opcoes"></div>
+
+            <div class="explicacao" id="explicacao" aria-live="polite">
+                <h3 id="titulo-explicacao"></h3>
+                <p id="texto-explicacao"></p>
+                <p class="outro-caminho" id="outro-caminho"></p>
+            </div>
+
+            <button class="botao" id="proximo" onclick="avancar()">
+                Próxima pergunta →
+            </button>
+
+        </section>
+
+        <section class="resultado" id="resultado">
+
+            <div class="icone">🏆</div>
+
+            <h2>Desafio concluído!</h2>
+
+            <p>
+                Você terminou as cinco perguntas sobre inteligência artificial.
+            </p>
+
+            <div class="pontuacao" id="pontuacao-final"></div>
+
+            <p id="mensagem-final"></p>
+
+            <button class="botao"
+                    style="display:block"
+                    onclick="reiniciar()">
+                Jogar novamente ↻
+            </button>
+
+        </section>
+
+        <footer class="rodape">
+            DESAFIO IA • PENSAR É QUESTIONAR
+        </footer>
+
+    </main>
+
+    <script>
+
+        const perguntas = [
+
+            {
+                pergunta: "1. A IA pensa ou calcula?",
+
+                opcoes: [
+                    "A) Ela pensa exatamente como um ser humano.",
+                    "B) Ela processa informações e reconhece padrões."
+                ],
+
+                correta: 1,
+
+                explicacao:
+                    "A IA processa informações, identifica padrões e resolve problemas. Isso não significa que tenha consciência ou pense como uma pessoa.",
+
+                outro:
+                    "💡 Outro caminho: dizer que a IA pensa é uma forma informal de descrever suas capacidades."
+            },
+
+            {
+                pergunta: "2. A IA cria ou copia?",
+
+                opcoes: [
+                    "A) Ela pode gerar conteúdos e combinações novas.",
+                    "B) Ela apenas copia exatamente o que já existe."
+                ],
+
+                correta: 0,
+
+                explicacao:
+                    "A IA pode combinar padrões aprendidos para produzir textos, imagens, músicas e ideias novas.",
+
+                outro:
+                    "💡 Outro caminho: suas criações dependem de conhecimentos e referências usados no treinamento."
+            },
+
+            {
+                pergunta: "3. A IA ajuda ou prejudica?",
+
+                opcoes: [
+                    "A) Ela sempre ajuda, independentemente do uso.",
+                    "B) Ela pode ajudar ou prejudicar, conforme o uso."
+                ],
+
+                correta: 1,
+
+                explicacao:
+                    "A IA pode facilitar estudos e tarefas, mas também pode gerar informações falsas ou ser usada de forma prejudicial.",
+
+                outro:
+                    "💡 Outro caminho: o uso responsável da tecnologia é essencial para aproveitar seus benefícios."
+            },
+
+            {
+                pergunta: "4. A IA entende ou imita?",
+
+                opcoes: [
+                    "A) Ela processa contextos e padrões para responder.",
+                    "B) Ela compreende tudo exatamente como um humano."
+                ],
+
+                correta: 0,
+
+                explicacao:
+                    "A IA utiliza informações e contextos para formular respostas, mas não compreende experiências como os seres humanos.",
+
+                outro:
+                    "💡 Outro caminho: ela consegue resolver problemas novos sem necessariamente possuir consciência."
+            },
+
+            {
+                pergunta: "5. A IA substitui ou complementa?",
+
+                opcoes: [
+                    "A) Ela pode substituir pessoas em certas tarefas.",
+                    "B) Ela só pode ajudar, nunca substituir ninguém."
+                ],
+
+                correta: 0,
+
+                explicacao:
+                    "A IA pode automatizar tarefas e substituir parte de algumas atividades profissionais.",
+
+                outro:
+                    "💡 Outro caminho: ela também pode complementar o trabalho humano, auxiliando em diversas atividades."
+            }
+
+        ];
+
+        let atual = 0;
+        let pontos = 0;
+        let respondeu = false;
+
+        const elementoPergunta =
+            document.getElementById("pergunta");
+
+        const elementoOpcoes =
+            document.getElementById("opcoes");
+
+        const elementoExplicacao =
+            document.getElementById("explicacao");
+
+        const botaoProximo =
+            document.getElementById("proximo");
+
+
+        function mostrarPergunta() {
+
+            respondeu = false;
+
+            const item = perguntas[atual];
+
+            document.getElementById("numero").textContent =
+                `Pergunta ${atual + 1} de ${perguntas.length}`;
+
+            document.getElementById("acertos").textContent =
+                `Acertos: ${pontos}`;
+
+            document.getElementById("barra").style.width =
+                `${(atual / perguntas.length) * 100}%`;
+
+            elementoPergunta.textContent = item.pergunta;
+
+            elementoOpcoes.innerHTML = "";
+
+            elementoExplicacao.style.display = "none";
+
+            botaoProximo.style.display = "none";
+
+
+            item.opcoes.forEach((opcao, indice) => {
+
+                const botao = document.createElement("button");
+
+                botao.className = "opcao";
+
+                botao.textContent = opcao;
+
+                botao.onclick = () => responder(indice);
+
+                elementoOpcoes.appendChild(botao);
+
+            });
+
+        }
+
+
+        function responder(escolha) {
+
+            if (respondeu) return;
+
+            respondeu = true;
+
+            const item = perguntas[atual];
+
+            const botoes =
+                elementoOpcoes.querySelectorAll(".opcao");
+
+            const acertou = escolha === item.correta;
+
+            if (acertou) {
+                pontos++;
+            }
+
+
+            botoes.forEach((botao, indice) => {
+
+                botao.disabled = true;
+
+                if (indice === item.correta) {
+
+                    botao.classList.add("correta");
+
+                } else if (indice === escolha) {
+
+                    botao.classList.add("errada");
+
+                }
+
+            });
+
+
+            document.getElementById("titulo-explicacao").textContent =
+                acertou
+                    ? "✓ Resposta correta!"
+                    : "✕ Resposta incorreta";
+
+
+            document.getElementById("texto-explicacao").textContent =
+                item.explicacao;
+
+            document.getElementById("outro-caminho").textContent =
+                item.outro;
+
+
+            elementoExplicacao.style.display = "block";
+
+
+            document.getElementById("acertos").textContent =
+                `Acertos: ${pontos}`;
+
+            document.getElementById("barra").style.width =
+                `${((atual + 1) / perguntas.length) * 100}%`;
+
+
+            botaoProximo.textContent =
+                atual === perguntas.length - 1
+                    ? "Ver resultado 🏆"
+                    : "Próxima pergunta →";
+
+            botaoProximo.style.display = "block";
+
+        }
+
+
+        function avancar() {
+
+            if (atual < perguntas.length - 1) {
+
+                atual++;
+
+                mostrarPergunta();
+
+            } else {
+
+                mostrarResultado();
+
+            }
+
+        }
+
+
+        function mostrarResultado() {
+
+            document.getElementById("jogo").style.display = "none";
+
+            document.getElementById("resultado").style.display = "block";
+
+            document.getElementById("pontuacao-final").textContent =
+                `${pontos} / ${perguntas.length}`;
+
+
+            let mensagem;
+
+            if (pontos === 5) {
+
+                mensagem =
+                    "Incrível! Você acertou todas as perguntas! 🧠";
+
+            } else if (pontos >= 3) {
+
+                mensagem =
+                    "Muito bem! Você já entende bastante sobre IA. 🚀";
+
+            } else {
+
+                mensagem =
+                    "Continue explorando! Cada resposta é uma oportunidade de aprender. 💜";
+
+            }
+
+
+            document.getElementById("mensagem-final").textContent =
+                mensagem;
+
+            document.getElementById("barra").style.width = "100%";
+
+        }
+
+
+        function reiniciar() {
+
+            atual = 0;
+
+            pontos = 0;
+
+            document.getElementById("jogo").style.display = "block";
+
+            document.getElementById("resultado").style.display = "none";
+
+            mostrarPergunta();
+
+        }
+
+
+        mostrarPergunta();
+
+    </script>
+
+</body>
+</html>
